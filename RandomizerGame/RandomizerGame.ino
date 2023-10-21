@@ -3,44 +3,66 @@
 #define RESET_PIN 2
 #define BTN1_PIN 4
 
+#define MIN_DLY 10
+#define SPD_DLY 100
+
 //Servo
-#define MAX_ANGLE 20
-#define START_ANGLE 45
+#define START_ANGLE 40
+#define MAX_ROTATE 20
+#define MIN_ANGLE START_ANGLE-MAX_ROTATE
+#define MAX_ANGLE START_ANGLE+MAX_ROTATE
 #define TURN_DELAY 10
-#define RIGHT 0
-#define LEFT 1
+#define CW 0
+#define CCW 1
 
 #include<Servo.h>
 
 
 Servo servo1;
-int servoLoc = 0;
+int servoLoc = START_ANGLE;
 int stepSize = 1;
+int speedDelay = 100;
 
+void reset();
 void rotate(int);
 int checkBtn(int);
 
 void setup() {
-
-//get init servo location
-  servoLoc = servo1.read();  
+  
+  servo1.write(servoLoc);
+  
+  delay(1000);
   servo1.attach(SERVO1_PIN);
+  delay(1000);
+  reset();
+  
+  //servoLoc = servo1.read(); 
 
   //setup buttons
   pinMode(RESET_PIN, INPUT);
   pinMode(BTN1_PIN, INPUT);
-
-  
-
 }
 
 void loop() {
+  /*
+  reset();
+  delay(1000);
+  scroll();
+  delay(1000);
+  */
+  /*
+  servo1.write(MIN_ANGLE);
+  //rotate(0);
+  delay(1000);
+  servo1.write(MAX_ANGLE);
+  //rotate(20);
+  delay(1000);
+  */
 
-  int mode = 0;
+  static int state = 1;
 
   static int btnState[2] = {0,0};
   //states 0=stationary at start, 1=back and forth
-  static int state = 1; 
 
   btnState[0] = checkBtn(0);
   
@@ -69,44 +91,53 @@ int checkBtn (int btnNum){
  return digitalRead(btns[btnNum]);
 }
 
-//provides stepwise rotation in either Dir up to limits
+//provides stepwise rotation to a desired location
 void rotate(int dir){
-  if(dir == RIGHT && servoLoc<START_ANGLE+MAX_ANGLE){
+  //adding is CW, subtract is CCW
+  if(dir==CW && servoLoc <MAX_ANGLE){
     servo1.write(servoLoc+=stepSize);
+    delay(speedDelay);
+    
   }
-  else if(dir==LEFT && servoLoc<START_ANGLE-MAX_ANGLE){
+  else if(dir == CCW && servoLoc > MIN_ANGLE){
     servo1.write(servoLoc-=stepSize);
+    delay(speedDelay);
   }
+  //read pos at end for checking
+   //servoLoc=servo1.read();
 }
 
 //get to start
 void reset(){
-  int tempStepSize = stepSize;
-  stepSize = 1;
-  
+  int tempStep = stepSize;
+  stepSize=1;
   while(servoLoc != START_ANGLE){
-    servoLoc=servo1.read();
-  if(servoLoc > START_ANGLE){
-    rotate(LEFT);
+  
+    if(servoLoc>START_ANGLE){
+      rotate(CCW);
+    }
+    else if(servoLoc<START_ANGLE){
+      rotate(CW);
+    }
   }
-  else if(servoLoc < START_ANGLE){
-    rotate(RIGHT);
-  }
-  }
-  stepSize = tempStepSize;
+  stepSize = tempStep;
+ // servoLoc = servo1.read();
+  
 }
 
 void scroll(){
-  //wherever you start rotate right until max angle
-  static int dir = RIGHT;
-  while(servoLoc<START_ANGLE+MAX_ANGLE){
-    rotate(RIGHT);
+  //wherever you start rotate CW until max angle
+  static int dir = CW;
+  while(servoLoc<START_ANGLE+MAX_ROTATE){
+    rotate(CW);
   }
-  while(servoLoc>START_ANGLE-MAX_ANGLE){
-    rotate(LEFT);
+  //then go back to min angle
+  while(servoLoc>START_ANGLE-MAX_ROTATE){
+    rotate(CCW);
   }
+  //then return to start
   while(servoLoc<START_ANGLE){
-    rotate(RIGHT);
+    rotate(CW);
   }
 
 }
