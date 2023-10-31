@@ -30,7 +30,8 @@
 
 //intensity
 #define BRIGHT              20
-#define DIM                 1
+#define SUPER_BRIGHT        100
+#define DIM                 10
 #define OFF                 0
 
 //TIMING
@@ -54,6 +55,7 @@ const int RED[3]          = {BRIGHT,0,0};
 const int GREEN[3]        = {0,BRIGHT,0};
 const int BLUE[3]         = {0,0,BRIGHT};
 const int YELLOW[3]       = {BRIGHT,BRIGHT,0};
+const int PURPLE[3]       ={SUPER_BRIGHT,0,SUPER_BRIGHT};
 //R, G, B, Y
 const int COLOR_ARRAY[4][3] = {{BRIGHT,0,0}, {0,BRIGHT,0}, {0,0,BRIGHT}, {BRIGHT,BRIGHT,0} };
 const int WHITE_ARR[3]    = {BRIGHT,BRIGHT,BRIGHT};
@@ -130,7 +132,7 @@ void loop(){
       strips[0]=0;
       strips[1] = 1;
       strips[2] = 1;
-      colorChange(strips, WHITE_DIM);
+      colorChange(strips, PURPLE);
       initFlag = 0;
     }
     
@@ -138,28 +140,28 @@ void loop(){
     //set channel strip to red
     colorChange(strips, RED);
     delay(2000);
-    colorChange(strips, WHITE_DIM);
+    colorChange(strips, PURPLE);
     }
   
       if (btnState[1] != 0){
     //set channel strip to blue
     colorChange(strips, BLUE);
     delay(2000);
-    colorChange(strips, WHITE_DIM);
+    colorChange(strips, PURPLE);
     }
     
     if (btnState[2] != 0){
     //set channel strip to Green
     colorChange(strips, GREEN);
     delay(2000);
-    colorChange(strips, WHITE_DIM);
+    colorChange(strips, PURPLE);
     }
     
     if (btnState[3] != 0){
     //set channel strip to yellow
     colorChange(strips, YELLOW);
     delay(2000);
-    colorChange(strips, WHITE_DIM);
+    colorChange(strips, PURPLE);
     }
   }
   else{
@@ -173,18 +175,32 @@ void loop(){
 void darkPulse(){
   int allStrips[NUM_STRIPS] = {1,1,1};
   int i=DIM;
-  for(i;i<BRIGHT;i++){
+  for(i;i<BRIGHT;i+=2){
     if(state == 1){return;}
-    int color[3] = {i,0,i+2};
-    delay(1);
+    int color[3] = {i,0,i};
+    //delay(1);
     
     colorChange(allStrips, color);
   }
-    for(i;i>DIM;i--){
+  for(i;i<SUPER_BRIGHT;i+=5){
+    if(state == 1){return;}
+    int color[3] = {i,0,i};
+    //delay(1);
+    
+    colorChange(allStrips, color);
+  }
+  for(i;i>BRIGHT;i-=5){
     if(state == 1){return;}
     int color[3] = {i,0,i+2};
     
-    delay(1);
+    //delay(1);
+    colorChange(allStrips, color);
+  }
+    for(i;i>DIM;i-=1){
+    if(state == 1){return;}
+    int color[3] = {i,0,i+2};
+    
+    //delay(1);
     colorChange(allStrips, color);
   }
 }
